@@ -7,10 +7,11 @@ public class PlayerController : MonoBehaviour
 {
 
     private Animator _anim;
-    private CharacterController _char;
+    private Rigidbody _char;
 
 
     private Vector3 moveDirection = Vector3.zero;
+    public GameObject PlayerModel;
     public PlayerInput inputs;
 
     public float speed;
@@ -19,14 +20,14 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _anim = GetComponent<Animator>();
-        _char = GetComponent<CharacterController>();
+        _anim = GetComponentInChildren<Animator>();
+        _char = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        print("GROUDNED: " + _char.isGrounded);
+        
         Move();
     }
 
@@ -46,33 +47,23 @@ public class PlayerController : MonoBehaviour
         InputAction inputValue = inputs.actions.FindAction("Move");
         Vector2 moveValue = inputValue.ReadValue<Vector2>();
 
-       
-
-
-        
-
         moveDirection = new Vector3(moveValue.x, 0.0f, moveValue.y);
 
-        /*
         if (moveDirection != Vector3.zero)
         {
             // Rotate character to face movement direction
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }*/
-
+            PlayerModel.transform.rotation = Quaternion.Slerp(PlayerModel.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
 
         moveDirection = transform.TransformDirection(moveDirection);
         moveDirection *= speed * Time.deltaTime;
-        _char.Move(moveDirection);
+        transform.Translate(moveDirection, Space.World);
     }
 
     public void Movement(InputAction.CallbackContext context)
     {
       
-
-
-       
 
         if (context.performed)
         {
