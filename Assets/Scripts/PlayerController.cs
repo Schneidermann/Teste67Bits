@@ -5,8 +5,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    int currBodies = 0;
     bool npcInRange;
     NPC currentNpc;
+    InertiaSim _inertiaSim;
 
     private Animator _anim;
     private Rigidbody _char;
@@ -15,6 +17,7 @@ public class PlayerController : MonoBehaviour
 
 
     public GameObject PlayerModel;
+    public Transform Hips;
     public PlayerInput inputs;
 
     public float speed;
@@ -25,6 +28,7 @@ public class PlayerController : MonoBehaviour
     {
         _anim = GetComponentInChildren<Animator>();
         _char = GetComponent<Rigidbody>();
+        _inertiaSim = FindAnyObjectByType<InertiaSim>();
     }
 
     // Update is called once per frame
@@ -43,7 +47,16 @@ public class PlayerController : MonoBehaviour
             _anim.SetTrigger("Punch");
             if (npcInRange && currentNpc != null)
             {
-                currentNpc.ActivateRagdoll();
+                if (!currentNpc.isDown)
+                    currentNpc.ActivateRagdoll(PlayerModel.transform);
+                else
+                {
+                    //pick body up logic (change to hips transform as param)
+                    currentNpc.PickUpBody(Hips, currBodies);
+                    _inertiaSim.BodiesHolder.Add(currentNpc.transform);
+                    _inertiaSim.UpdateLineRendererPoints();
+                    currBodies++;
+                }
             }
         }
            
@@ -93,7 +106,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("NPC"))
         {
             npcInRange = true;
-            currentNpc = other.gameObject.GetComponent<NPC>();
+            currentNpc = other.gameObject.GetComponentInParent<NPC>();
             print($"trigger entered. current npc name = {currentNpc.gameObject.name}");
         }
     }
