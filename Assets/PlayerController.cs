@@ -5,12 +5,15 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    bool npcInRange;
+    NPC currentNpc;
 
     private Animator _anim;
     private Rigidbody _char;
 
-
     private Vector3 moveDirection = Vector3.zero;
+
+
     public GameObject PlayerModel;
     public PlayerInput inputs;
 
@@ -38,6 +41,10 @@ public class PlayerController : MonoBehaviour
         {
             print("Punch " + context.phase);
             _anim.SetTrigger("Punch");
+            if (npcInRange && currentNpc != null)
+            {
+                currentNpc.ActivateRagdoll();
+            }
         }
            
     }
@@ -79,5 +86,27 @@ public class PlayerController : MonoBehaviour
 
        
     }
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("NPC"))
+        {
+            npcInRange = true;
+            currentNpc = other.gameObject.GetComponent<NPC>();
+            print($"trigger entered. current npc name = {currentNpc.gameObject.name}");
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("NPC"))
+        {
+            print($"trigger exited!");
+            npcInRange = false;
+            currentNpc = null;
+        }
+    }
+
 
 }
