@@ -8,7 +8,12 @@ public class InertiaSim : MonoBehaviour
 {
     public static int Money;
     public static int BodyCapacity = 2;
+    public GameObject NpcsPrefab;
+    public Transform NpcGroupTransform;
     int upgradeCost = 2;
+    int bodiesTotal;
+    
+
 
     public Transform playerTransform;
     public Transform playerModel; // Child object controlling rotation
@@ -68,8 +73,8 @@ public class InertiaSim : MonoBehaviour
 
 
         UpgradeCostText.text = "Upgrade: $" + upgradeCost;
-        MoneyText.text = "Money: " + Money.ToString() + ".  Carry Capacity: " + BodyCapacity;
-        print($"Money:{Money}; BodiesLimit:{BodyCapacity}");
+        MoneyText.text = "Money: $" + Money.ToString() + ".  Carry Capacity: " + BodyCapacity;
+        
     }
 
     void FixedUpdate()
@@ -150,6 +155,7 @@ public class InertiaSim : MonoBehaviour
             bodyPileMultiplier.RemoveAt(i);
             body.GetComponentInParent<NPC>().ReleaseBody();
             bodiesRemoved++;
+            bodiesTotal++;
         }
 
 
@@ -165,6 +171,14 @@ public class InertiaSim : MonoBehaviour
 
         print("Bodies removed: " + (bodyCount - 1));
         print("Total money: " + Money);
+
+        if(bodiesTotal >= 12)
+        {
+            bodiesTotal = 0;
+            var newGroup = Instantiate(NpcsPrefab, NpcGroupTransform.position, NpcGroupTransform.rotation);
+            Destroy(NpcGroupTransform.gameObject);
+            NpcGroupTransform = newGroup.transform;
+        }
 
     }
 
