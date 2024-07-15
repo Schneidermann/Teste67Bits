@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour
 {
     int currBodies = 0;
     bool npcInRange;
+    bool canDrop;
+    float speedDebuff;
+
     NPC currentNpc;
     InertiaSim _inertiaSim;
 
@@ -52,11 +55,21 @@ public class PlayerController : MonoBehaviour
                 else
                 {
                     //pick body up logic (change to hips transform as param)
-                    currentNpc.PickUpBody(Hips, currBodies);
-                    _inertiaSim.BodiesHolder.Add(currentNpc.transform);
-                    _inertiaSim.UpdateLineRendererPoints();
-                    currBodies++;
+                    if(currBodies < InertiaSim.BodyCapacity)
+                    {
+                        currentNpc.PickUpBody(Hips, currBodies);
+
+                        currBodies++;
+                        speed -= 0.3f;
+                    }
+                    
                 }
+            }
+            else if (canDrop && currBodies >= 1)
+            {
+                _inertiaSim.RemoveBodiesFromPile();
+                currBodies = _inertiaSim.BodiesHolder.Count - 1;
+                speed = 5;
             }
         }
            
@@ -64,6 +77,7 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
+        
         InputAction inputValue = inputs.actions.FindAction("Move");
         Vector2 moveValue = inputValue.ReadValue<Vector2>();
 
@@ -71,7 +85,6 @@ public class PlayerController : MonoBehaviour
 
         if (moveDirection != Vector3.zero)
         {
-            // Rotate character to face movement direction
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             PlayerModel.transform.rotation = Quaternion.Slerp(PlayerModel.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
@@ -109,6 +122,11 @@ public class PlayerController : MonoBehaviour
             currentNpc = other.gameObject.GetComponentInParent<NPC>();
             print($"trigger entered. current npc name = {currentNpc.gameObject.name}");
         }
+        else if (other.CompareTag("Drop"))
+        {
+            print($"trigger entered. bodies count = {currBodies}");
+            canDrop = true;
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -118,6 +136,11 @@ public class PlayerController : MonoBehaviour
             print($"trigger exited!");
             npcInRange = false;
             currentNpc = null;
+        }
+        else if (other.CompareTag("Drop"))
+        {
+            print($"trigger exited!");
+            canDrop = false;
         }
     }
 

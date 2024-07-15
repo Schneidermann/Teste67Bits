@@ -17,10 +17,12 @@ public class NPC : MonoBehaviour
     public List<Collider> colls;
 
     Transform thisHipsTransform;
+    InertiaSim _inertiaSim;
 
     // Start is called before the first frame update
     void Start()
     {
+        _inertiaSim = FindAnyObjectByType<InertiaSim>();
         thisHipsTransform = Rbs.Find(x => x.gameObject.name == "mixamorig:Hips").gameObject.transform;
     }
 
@@ -68,8 +70,6 @@ public class NPC : MonoBehaviour
     public void PickUpBody(Transform playerHipsTransform, int piledBodies)
     {
         this.transform.SetParent(playerHipsTransform);
-        
-
 
         
         foreach (Rigidbody r in Rbs)
@@ -92,16 +92,17 @@ public class NPC : MonoBehaviour
 
         }
        
-
+        //piled bodies is the amount of objects already piled up
         this.transform.SetLocalPositionAndRotation(new Vector3(-1.4f, 0.2f + piledBodies, -0.8f), Quaternion.identity);
         this.transform.localRotation = Quaternion.Euler(-90, -90, 0);
-
+        _inertiaSim.AddBodyToPile(thisHipsTransform);
     }
 
 
     public void ReleaseBody()
     {
-        thisHipsTransform.SetParent(null);
+        this.transform.SetParent(null);
+        Destroy(this.gameObject);
 
     }
 }
